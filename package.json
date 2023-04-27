@@ -16,6 +16,7 @@
     "recordrtc": "^5.6.2",
     "socket.io-client": "^4.6.1",
     "socket.io-stream": "^0.9.1",
+    "utils": "^0.3.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
