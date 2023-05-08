@@ -16,7 +16,8 @@
     "recordrtc": "^5.6.2",
     "socket.io-client": "^4.6.1",
     "socket.io-stream": "^0.9.1",
-    "utils": "^0.3.1",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -42,5 +43,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "node-stdlib-browser": "^1.2.0"
   }
 }

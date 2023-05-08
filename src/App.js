@@ -8,8 +8,11 @@ const App = () => {
     const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJqZWN0IjoiNjQzNzdjZDMwZTU1NDYwMWQ4YTAxYTM0IiwiaWF0IjoxNjgyMTkxOTIxLCJleHAiOjE2ODIxOTU1MjF9.t1jn27bWpilBpvyf3-5YKZiSXFGSPlH1xLSFm_3GmRY";
 
     const [recording, setRecording] = useState(false);
+    const [audioBlob, setAudioBlob] = useState(null);
 
-    const socketio = io(`ws://192.168.0.247:4001/chat/?token=${token}`,
+    const audioPlayer = useRef(null);
+    const recordAudio = useRef(null);
+    const socketio = io(`ws://localhost:4001/chat/?token=${token}`,
     {
       reconnectionDelay: 1000,
       reconnection: true,
@@ -20,6 +23,7 @@ const App = () => {
       rejectUnauthorized: false
   }
   );
+
   const socket = socketio.on('connect', () => {
     console.log('server connected');
   });
@@ -27,13 +31,30 @@ const App = () => {
   socketio.on('disconnect', () => {
      console.log('server disconnected');
   });
-     
-    const startRecording = async () => {
 
+  socketio.on('output',  (data)=> {
+    console.log("recieved from server");
+    console.log(data);
+    if(data){
+         // Convert the file to a blob
+    const reader = new FileReader();
+    reader.readAsArrayBuffer(data);
+    reader.onload = (event) => {
+      const blob = new Blob([event.target.result], { type: "audio/wav" });
+      setAudioBlob(blob);
+    };
+
+        // play the audio
+        audioPlayer.current.src = audioBlob;
+        audioPlayer.current.play();
+    }
+});
+
+const startRecording = async () => {
         navigator.getUserMedia({
             audio: true
         }, function(stream) {
-                recordAudio = RecordRTC(stream, {
+                recordAudio.current = RecordRTC(stream, {
                 type: 'audio',
                 mimeType: 'audio/webm',
                 sampleRate: 44100,
@@ -41,8 +62,6 @@ const App = () => {
                 
                 recorderType: StereoAudioRecorder,
                 numberOfAudioChannels: 1,
-
-
                 //1)
                 // get intervals based blobs
                 // value in milliseconds
@@ -52,7 +71,7 @@ const App = () => {
                 //2)
                 // as soon as the stream is available
                 ondataavailable: function(blob) {
-                    console.log('recording available here');
+                   // console.log('recording available here');
                     // 3
                     // making use of socket.io-stream for bi-directional
                     // streaming, create a stream
@@ -68,7 +87,7 @@ const App = () => {
                 }
             });
 
-            recordAudio.startRecording();
+            recordAudio.current.startRecording();
             setRecording(true);
 
         }, function(error) {
@@ -79,8 +98,12 @@ const App = () => {
     };
 
     const stopRecording = () => {
-        setRecording(false);
+      //  setRecording(false);
+       // recordAudio.stopRecording(stopRecordingCallback);
+       recordAudio.current.stopRecording(function() { setRecording(false);});
+
     };
+
 
     return (
         <div>
