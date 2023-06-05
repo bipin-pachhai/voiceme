@@ -5,14 +5,13 @@ import ss from 'socket.io-stream';
 import './App.css';
 
 const App = () => {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJqZWN0IjoiNjQzNzdjZDMwZTU1NDYwMWQ4YTAxYTM0IiwiaWF0IjoxNjgyMTkxOTIxLCJleHAiOjE2ODIxOTU1MjF9.t1jn27bWpilBpvyf3-5YKZiSXFGSPlH1xLSFm_3GmRY";
-
+   const token = "hh";
     const [recording, setRecording] = useState(false);
     const [audioBlob, setAudioBlob] = useState(null);
 
     const audioPlayer = useRef(null);
     const recordAudio = useRef(null);
-    const socketio = io(`ws://localhost:4001/chat/?token=${token}`,
+    const socketio = io(`ws://localhost:4001/chat/`,
     {
       reconnectionDelay: 1000,
       reconnection: true,
@@ -35,19 +34,13 @@ const App = () => {
   socketio.on('output',  (data)=> {
     console.log("recieved from server");
     console.log(data);
-    if(data){
-         // Convert the file to a blob
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(data);
-    reader.onload = (event) => {
-      const blob = new Blob([event.target.result], { type: "audio/wav" });
-      setAudioBlob(blob);
-    };
-
-        // play the audio
-        audioPlayer.current.src = audioBlob;
+      if (data) {
+        const blob = new Blob([data], { type: 'audio/wav' });
+        setAudioBlob(blob);
+        audioPlayer.current.src = URL.createObjectURL(blob);
         audioPlayer.current.play();
-    }
+      }
+    
 });
 
 const startRecording = async () => {
@@ -71,7 +64,7 @@ const startRecording = async () => {
                 //2)
                 // as soon as the stream is available
                 ondataavailable: function(blob) {
-                   // console.log('recording available here');
+                    //console.log('recording available here');
                     // 3
                     // making use of socket.io-stream for bi-directional
                     // streaming, create a stream
